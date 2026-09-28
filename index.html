@@ -82,6 +82,19 @@
   .total span{font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#8A6A1E}
   .total b{font-family:'Playfair Display',serif;font-size:28px;color:var(--forest)}
 
+  .vault{background:linear-gradient(150deg,#123A2A,#2E5D3A 70%);border:1.5px solid rgba(218,167,90,.7);border-radius:18px;padding:18px;color:#F7F4EC}
+  .vault h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:6px}
+  .vault p.v{font-size:13.5px;line-height:1.6;color:rgba(247,244,236,.85)}
+  .tiers{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0 4px}
+  .tierbox{flex:1 1 90px;background:rgba(247,244,236,.08);border:1px solid rgba(218,167,90,.34);border-radius:11px;padding:9px 10px;text-align:center}
+  .tierbox i{font-style:normal;font-size:17px;display:block}
+  .tierbox b{display:block;font-size:12.5px;color:#F7F4EC;margin-top:2px}
+  .tierbox span{font-size:12px;color:var(--gold-soft)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+  .chip{background:rgba(247,244,236,.08);border:1px solid rgba(218,167,90,.4);color:var(--gold-soft);border-radius:99px;padding:7px 13px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .chip.on{background:var(--gold);color:#23472C;border-color:var(--gold)}
+  .vault label.f{color:var(--gold-soft)}
+
   .qrs{display:flex;gap:11px;flex-wrap:wrap;margin-top:12px}
   .qr{flex:1 1 180px;background:#fff;border:1.5px solid rgba(218,167,90,.5);border-radius:14px;padding:10px;text-align:center}
   .qr img{width:100%;max-width:230px;border-radius:9px;display:block;margin:0 auto}
@@ -139,9 +152,9 @@
       <li><b>Please be certain before you sign up.</b> This is a shared ride with a shared cost. Every person who backs out pushes the fare up for everyone still going, and that lands hardest on the Madams travelling on a tight budget. Check your schedule, then commit.</li>
       <li><b>Be ready for an early start.</b> We may need to leave earlier than you'd expect — the admins especially, since there may be a fanzone before the show. The departure time will be announced in the group chat and here, so plan your morning around it.</li>
       <li><b>One extra stop may be added.</b> Depending on how arrangements land, we may add a single additional pick-up and drop-off point. If it happens, we'll announce it. Just one, though — more stops means a slower trip for everybody.</li>
-      <li><b>No refunds.</b> Once you've paid, the money goes straight into securing the bus, so we can't return it if your plans change.</li>
       <li><b>Group booking is for pre-registered riders only.</b> If you pre-registered, you may pay for up to five riders at once — as long as every person in that booking pre-registered too. Otherwise each person signs up separately. Everyone needs their own name, IG handle and number.</li>
       <li><b>Your seat is only yours once we've verified your payment.</b> Signing up doesn't hold a seat by itself. We check every payment, then email you — that email is your seat.</li>
+      <li><b>No refunds.</b> Once you've paid, the money goes straight into securing the bus, so we can't return it if your plans change.</li>
     </ol>
     <p class="hint" style="margin-top:14px">Pre-registered riders are booked as round trip, since the fare was worked out that way. We have everyone's number, so we'll text riders directly with the day's details too.</p>
   </div>
@@ -170,7 +183,7 @@
 
   var screen = document.getElementById('screen');
   var seatBox = document.getElementById('seats');
-  var seats = null, riders = [{}], preregMain = false, proofData = '', proofName = '';
+  var seats = null, riders = [{}], preregMain = false, proofData = '', proofName = '', donation = '';
 
   function esc(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function normH(v){ return String(v||'').trim().toLowerCase().replace(/^@/,'').replace(/\s+/g,''); }
@@ -228,11 +241,16 @@
       '</div>';
   }
 
-  function total() {
+  function fares() {
     var t = 0;
     riders.forEach(function (r) { t += r.prereg ? RATE.round : (RATE[r.trip] || RATE.round); });
     return t;
   }
+  function donationAmt() {
+    var n = parseInt(String(donation).replace(/[^0-9]/g, ''), 10);
+    return isNaN(n) || n < 0 ? 0 : n;
+  }
+  function total() { return fares() + donationAmt(); }
 
   function showForm(keepScroll) {
     if (seats && seats.available < 1 && !preregMain) {
@@ -260,12 +278,41 @@
           ? '<button type="button" class="addrider" id="add"' + (riders.length >= 5 ? ' disabled' : '') + '>+ Add another pre-registered rider (up to 5)</button>' +
             '<p class="hint">Everyone you pay for must be on the pre-registered list. Anyone who isn\u2019t signs up on their own.</p>'
           : '') +
-        '<div class="total"><span>Total to pay</span><b>₱' + total() + '</b></div>' +
+        '<div class="total"><span>Fares</span><b>₱' + fares() + '</b></div>' +
+      '</div>' +
+
+      '<div class="sec"><span class="sec-label">Add a donation <span style="text-transform:none;letter-spacing:0;font-weight:400;color:#6F7A70">— optional</span></span><span class="sec-rule"></span></div>' +
+      '<div class="vault">' +
+        '<h2>The Madams\u2019 Vault</h2>' +
+        '<p class="v">Riding with us anyway? You can add a little something for the Vault in the same transfer. It keeps our events running \u2014 and it counts toward your tier.</p>' +
+        '<div class="tiers">' +
+          '<div class="tierbox"><i>\uD83D\uDC8E</i><b>Jade</b><span>\u20b11,000</span></div>' +
+          '<div class="tierbox"><i>\uD83D\uDC9A</i><b>Emerald</b><span>\u20b12,500</span></div>' +
+          '<div class="tierbox"><i>\uD83E\uDD47</i><b>Gold</b><span>\u20b15,000</span></div>' +
+          '<div class="tierbox"><i>\uD83D\uDC51</i><b>Crown</b><span>\u20b17,000+</span></div>' +
+        '</div>' +
+        '<p class="v" style="font-size:12.5px">Tiers reset every quarter and your all-time total lives on in the Hall of Madams. Only the donation counts toward a tier \u2014 your fare doesn\u2019t. Tracking uses your email and IG handle, so keep them the same each time.</p>' +
+        '<label class="f">How much would you like to add?</label>' +
+        '<div class="chips" id="chips">' +
+          '<button type="button" class="chip" data-amt="0">None</button>' +
+          '<button type="button" class="chip" data-amt="250">\u20b1250</button>' +
+          '<button type="button" class="chip" data-amt="500">\u20b1500</button>' +
+          '<button type="button" class="chip" data-amt="1000">\u20b11,000</button>' +
+        '</div>' +
+        '<label class="f">Or type an amount</label>' +
+        '<input type="text" id="donation" inputmode="numeric" placeholder="0" value="' + (donation || '') + '">' +
+        '<label class="f">On the donor wall</label>' +
+        '<select id="donorWall">' +
+          '<option value="Name">Show my name</option>' +
+          '<option value="Anonymous">List me as an Anonymous Madam</option>' +
+          '<option value="Private">Please keep me off the wall</option>' +
+        '</select>' +
       '</div>' +
 
       '<div class="sec"><span class="sec-label">Payment</span><span class="sec-rule"></span></div>' +
       '<div class="card">' +
-        '<p class="hint" style="margin:0 0 4px">Send <b>₱' + total() + '</b> to either account, then upload your screenshot below.</p>' +
+        '<div class="total" style="margin-top:0;border-top:none;padding-top:0"><span>Total to send</span><b id="grand">₱' + total() + '</b></div>' +
+        '<p class="hint" id="payLine">Send the total above to either account in one transfer, then upload your screenshot below.</p>' +
         '<div class="qrs">' +
           '<div class="qr"><img src="' + QR.bpi + '" alt="BPI QR code"><p>BPI · MadamsWB</p></div>' +
           '<div class="qr"><img src="' + QR.bdo + '" alt="BDO QR code"><p>BDO · MadamsofWB</p></div>' +
@@ -309,14 +356,29 @@
       shrink(f, 1400, 0.82).then(function (d) { proofData = d; proofName = f.name || 'proof.jpg'; })
                            .catch(function () { proofData = ''; alert('We couldn\u2019t read that image — please try another screenshot.'); });
     };
+    if ($('donation')) $('donation').oninput = function () { donation = this.value; markChip(); refreshTotal(); };
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) {
+      c.onclick = function () {
+        donation = c.getAttribute('data-amt');
+        if ($('donation')) $('donation').value = donation === '0' ? '' : donation;
+        markChip(); refreshTotal();
+      };
+    });
+    markChip();
     if ($('send')) $('send').onclick = submit;
   }
 
   function refreshTotal() {
-    var t = document.querySelector('.total b');
-    if (t) t.textContent = '₱' + total();
-    var p = document.querySelector('#screen .card .hint b');
-    if (p) p.textContent = '₱' + total();
+    var f = document.querySelector('.total b');
+    if (f) f.textContent = '₱' + fares();
+    if ($('grand')) $('grand').textContent = '₱' + total();
+  }
+
+  function markChip() {
+    var d = String(donationAmt());
+    Array.prototype.forEach.call(document.querySelectorAll('.chip'), function (c) {
+      c.classList.toggle('on', c.getAttribute('data-amt') === d);
+    });
   }
 
   function applyPrereg(i, res) {
@@ -392,6 +454,7 @@
                member: r.member || 'Yes', trip: r.prereg ? 'round' : (r.trip || 'round') };
     });
     post({ email: email, riders: JSON.stringify(payload), payment: $('payment').value,
+           donation: donationAmt(), donorWall: $('donorWall').value,
            proof: proofData, proofName: proofName }, function () { thanks(email); });
   }
 
@@ -424,6 +487,8 @@
       '<div style="font-family:\'Playfair Display\',serif;font-size:22px;font-weight:700;color:#0C3125;margin-bottom:9px">Salamat, Fam! \uD83D\uDC9A</div>' +
       '<p style="font-size:14.5px;line-height:1.6;color:#46604D">We\u2019ve got your sign-up for <b>' + esc(names.join(', ')) + '</b> and your payment screenshot.</p>' +
       '<p style="font-size:14.5px;line-height:1.6;color:#46604D;margin-top:10px">A confirmation is on its way to <b>' + esc(email) + '</b>. The Circle will check your payment, then email you again \u2014 <b>that</b> email means your seat is officially yours.</p>' +
+      (donationAmt() ? '<p style="font-size:14px;color:#46604D;margin-top:10px">And thank you for the \u20b1' + donationAmt() +
+        ' for the Vault \u2014 it counts toward your tier once verified. \uD83D\uDC9A</p>' : '') +
       '<p style="font-size:13px;color:#6F7A70;margin-top:12px">Departure time and meeting point will be announced in the group chat and here on this page.</p>' +
       '</div>';
     window.scrollTo({ top: screen.offsetTop - 20, behavior: 'smooth' });
