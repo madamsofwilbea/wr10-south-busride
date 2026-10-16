@@ -148,7 +148,7 @@
   <div class="sec"><span class="sec-label">Before you sign up</span><span class="sec-rule"></span></div>
   <div class="card">
     <ol class="rules">
-      <li><b>Open to everyone, pre-registered riders first.</b> Anyone may join, but Madams who pre-registered in the group chat have first claim on a seat. If that's you, sign up with the exact IG handle on the group chat list. Held seats stay yours until <b>20 October</b> — after that, anything unclaimed opens to everyone.</li>
+      <li><b>Every seat is now open to everyone.</b> The hold for pre-registered riders has ended, so seats go in the order they're paid for — first paid, first seated. If you pre-registered in the group chat and haven't paid yet, your seat is no longer set aside, so please sign up soon. Do use the exact IG handle from the group chat list so we can match you.</li>
       <li><b>Please be certain before you sign up.</b> This is a shared ride with a shared cost. Every person who backs out pushes the fare up for everyone still going, and that lands hardest on the Madams travelling on a tight budget. Check your schedule, then commit.</li>
       <li><b>Be ready for an early start.</b> We may need to leave earlier than you'd expect — the admins especially, since there may be a fanzone before the show. The departure time will be announced in the group chat and here, so plan your morning around it.</li>
       <li><b>One extra stop may be added.</b> Depending on how arrangements land, we may add a single additional pick-up and drop-off point. If it happens, we'll announce it. Just one, though — more stops means a slower trip for everybody.</li>
@@ -199,8 +199,8 @@
       seats = d;
       seatBox.innerHTML = d.available > 0
         ? '<b>' + d.available + '</b><span>seat' + (d.available === 1 ? '' : 's') + ' open right now' +
-          (d.held ? ' · ' + d.held + ' still held for pre-registered riders until 20 October' : '') + '</span>'
-        : '<b>Full</b><span>' + (d.held ? d.held + ' seats are still held for pre-registered riders until 20 October' : 'all ' + d.capacity + ' seats are taken') + '</span>';
+          (d.held ? ' · ' + d.held + ' still held for pre-registered riders' : '') + '</span>'
+        : '<b>Full</b><span>all ' + d.capacity + ' seats are taken</span>';
       showForm();
     };
     function ask() {
@@ -253,18 +253,9 @@
   function total() { return fares() + donationAmt(); }
 
   function showForm(keepScroll) {
-    if (seats && seats.available < 1 && !preregMain) {
+    if (seats && seats.available < 1) {
       screen.innerHTML = '<div class="full"><b style="font-family:\'Playfair Display\',serif;font-size:19px;color:#0C3125;display:block;margin-bottom:6px">The bus is full</b>' +
-        'Every open seat is taken. If you pre-registered in the group chat, enter your handle below — your seat is still held for you until 20 October.' +
-        '<div style="margin-top:12px;text-align:left"><label class="f">Your Instagram handle</label>' +
-        '<input type="text" id="lateHandle" placeholder="@yourhandle">' +
-        '<button class="btn" id="lateGo">Check my held seat</button></div></div>';
-      $('lateGo').onclick = function () {
-        checkHandle(normH($('lateHandle').value), function (res) {
-          if (res && res.prereg && !res.taken) { riders = [{ handle: $('lateHandle').value, prereg: true }]; preregMain = true; showForm(); }
-          else alert(res && res.taken ? 'That handle has already signed up.' : 'We couldn\u2019t find that handle on the pre-registered list.');
-        });
-      };
+        'Every seat is taken, including the ones once held for pre-registered riders. If something frees up we\u2019ll say so in the group chat \u2014 keep an eye out.</div>';
       return;
     }
 
@@ -390,7 +381,7 @@
     var note = document.querySelector('.rider[data-i="' + i + '"] .ok-note');
     if (note) {
       if (res.taken) { note.textContent = 'This handle has already signed up.'; note.style.color = '#A8566A'; note.style.display = 'block'; }
-      else if (res.prereg) { note.textContent = '✓ Pre-registered — your seat is held until 20 October, round trip.'; note.style.color = '#2E5D3A'; note.style.display = 'block'; }
+      else if (res.prereg) { note.textContent = '✓ Pre-registered — booked as round trip. Seats now go in the order they\u2019re paid for, so do finish below.'; note.style.color = '#2E5D3A'; note.style.display = 'block'; }
       else { note.textContent = ''; note.style.display = 'none'; }
     }
     if (!!was !== !!res.prereg) showForm(true);
